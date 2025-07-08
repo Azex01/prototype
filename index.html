@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Logistics Management Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="script.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Logistics Management Dashboard</h1>
+        </div>
+
+        <!-- Action Buttons Section -->
+        <div class="action-buttons">
+            <button class="action-btn upload-pod" onclick="scrollToTripListAndFilter('pod')">
+                <div class="action-btn-content">
+                    <h3>Upload POD</h3>
+                    <p>Trips requiring Proof of Delivery upload</p>
+                    <span class="badge" id="pod-count">12</span>
+                </div>
+            </button>
+            <button class="action-btn create-invoices" onclick="scrollToTripListAndFilter('invoice')">
+                <div class="action-btn-content">
+                    <h3>Create Invoices</h3>
+                    <p>Trips that need invoices to be created</p>
+                    <span class="badge" id="invoice-count">8</span>
+                </div>
+            </button>
+            <button class="action-btn customs-clearance" onclick="scrollToTripListAndFilter('customs')">
+                <div class="action-btn-content">
+                    <h3>Transfer request</h3>
+                    <p>Transfer request hahahah</p>
+                    <span class="badge" id="customs-count">5</span>
+                </div>
+            </button>
+            <button class="action-btn trip-finalization" onclick="scrollToTripListAndFilter('finalization')">
+                <div class="action-btn-content">
+                    <h3>Assign Drivers</h3>
+                    <p>Trips that need drivers to be assigned</p>
+                    <span class="badge" id="finalization-count">15</span>
+                </div>
+            </button>
+        </div>
+
+        <!-- Main Content Area -->
+        <div class="main-content">
+            <!-- Filter Panel -->
+            <div class="filter-panel">
+                <h3>Filter Dashboard <a href="#" class="clear-btn" onclick="clearAllFilters()">Clear</a></h3>
+                
+                <div class="filter-section">
+                    <label>By Action Needed</label>
+                    <div class="checkbox-group">
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="pod-filter" value="pod">
+                            <label for="pod-filter">Upload POD</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="invoice-filter" value="invoice">
+                            <label for="invoice-filter">Create Invoice</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="customs-filter" value="customs">
+                            <label for="customs-filter">Customs Clearance</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="finalization-filter" value="finalization">
+                            <label for="finalization-filter">Trip Finalization</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="filter-section">
+                    <label for="plate-filter">By Plate Number</label>
+                    <input type="text" id="plate-filter" placeholder="Enter plate number">
+                </div>
+
+                <div class="filter-section">
+                    <label>By Pickup Date</label>
+                    <div class="date-range">
+                        <input type="date" id="date-from">
+                        <span>to</span>
+                        <input type="date" id="date-to">
+                    </div>
+                </div>
+
+                <div class="filter-section">
+                    <label for="status-filter">By Trip Status</label>
+                    <select id="status-filter">
+                        <option value="">All Statuses</option>
+                        <option value="pending">Pending</option>
+                        <option value="approved">Approved</option>
+                        <option value="completed">Completed</option>
+                    </select>
+                </div>
+
+                <div class="filter-section">
+                    <label for="client-filter">By Client</label>
+                    <input type="text" id="client-filter" placeholder="Search client">
+                </div>
+
+                <div class="filter-section">
+                    <label for="carrier-filter">By Carrier</label>
+                    <input type="text" id="carrier-filter" placeholder="Search carrier">
+                </div>
+            </div>
+
+            <!-- Table Section -->
+            <div class="table-section" id="trip-list-section">
+                <div class="table-header">
+                    <h2>Trip List</h2>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Pickup Date</th>
+                                <th>From</th>
+                                <th>To</th>
+                                <th>Client</th>
+                                <th>Carrier</th>
+                                <th>Bayan Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="trip-table-body">
+                            <!-- Trip data will be populated here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Trip Details Modal -->
+    <div class="modal-overlay" id="trip-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <button class="close-btn" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-content-flex">
+                <div class="trip-overview">
+                    <div class="trip-overview-grid">
+                        <div class="detail-item">
+                            <label>Trip ID</label>
+                            <span id="trip-id"></span>
+                        </div>
+                        <div class="detail-item">
+                            <label>Pickup Date</label>
+                            <span id="pickup-date"></span>
+                        </div>
+                        <div class="detail-item">
+                            <label>From</label>
+                            <span id="from"></span>
+                        </div>
+                        <div class="detail-item">
+                            <label>To</label>
+                            <span id="to"></span>
+                        </div>
+                        <div class="detail-item">
+                            <label>Client</label>
+                            <span id="client"></span>
+                        </div>
+                        <div class="detail-item">
+                            <label>Carrier</label>
+                            <span id="carrier"></span>
+                        </div>
+                        <div class="detail-item">
+                            <label>Plate Number</label>
+                            <span id="plate-number"></span>
+                        </div>
+                        <div class="detail-item">
+                            <label>Bayan Status</label>
+                            <span id="bayan-status"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="content-scroll-wrapper">
+                    <div class="truck-list" id="truck-list">
+                        <!-- Add truck search bar -->
+                        <div class="truck-search">
+                            <input type="text" 
+                                   id="truck-search-input" 
+                                   placeholder="Search plate number..."
+                                   oninput="filterTrucks(this.value)">
+                        </div>
+                        <!-- Truck buttons will be rendered here -->
+                    </div>
+                    <div class="tab-content-wrapper">
+                        <div class="action-tabs">
+                            <div class="tab-list">
+                                <button class="tab-btn active" data-tab="truck-details">
+                                    Truck Details
+                                </button>
+                                <button class="tab-btn" data-tab="pod">
+                                    Upload POD
+                                    <div class="tab-status status-pending-dot"></div>
+                                </button>
+                                <button class="tab-btn" data-tab="invoice">
+                                    Create Invoice
+                                    <div class="tab-status status-approved-dot"></div>
+                                </button>
+                                <button class="tab-btn" data-tab="customs">
+                                    Customs Clearance
+                                    <div class="tab-status status-pending-dot"></div>
+                                </button>
+                                <button class="tab-btn" data-tab="finalization">
+                                    Trip Finalization
+                                    <div class="tab-status status-pending-dot"></div>
+                                </button>
+                            </div>
+                            <div id="tab-content">
+                                <p>Select an action tab to view details and take action.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <div class="more-actions">
+                        <button class="more-btn" onclick="toggleDropdown()">More</button>
+                        <div class="dropdown-menu" id="dropdown-menu">
+                            <div class="dropdown-item">Export to Excel</div>
+                            <div class="dropdown-item">Cancel Trip</div>
+                            <div class="dropdown-item">Add Additional Costs</div>
+                        </div>
+                    </div>
+                    <button class="primary-btn" onclick="closeModal()">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- New Request Modal -->
+    <div class="modal-overlay" id="new-request-modal">
+        <div class="modal new-request-modal">
+            <div class="stepper">
+                <div class="step active">
+                    <div class="step-circle">1</div>
+                    <div class="step-label">Client</div>
+                </div>
+                <div class="step-connector"></div>
+                <div class="step">
+                    <div class="step-circle">2</div>
+                    <div class="step-label">Route</div>
+                </div>
+                <div class="step-connector"></div>
+                <div class="step">
+                    <div class="step-circle">3</div>
+                    <div class="step-label">Truck</div>
+                </div>
+                <div class="step-connector optional-step" id="connector-3-4"></div>
+                <div class="step optional-step" id="step-4">
+                    <div class="step-circle">4</div>
+                    <div class="step-label">Driver</div>
+                </div>
+                <div class="step-connector optional-step" id="connector-4-5"></div>
+                <div class="step optional-step" id="step-5">
+                    <div class="step-circle">5</div>
+                    <div class="step-label">POD Upload</div>
+                </div>
+            </div>
+
+            <div class="new-request-content">
+                <div class="form-section" id="form-content">
+                    <!-- Form content will be dynamically loaded here -->
+                </div>
+
+                <div class="order-summary">
+                    <h3>Request Summary</h3>
+                    <div class="summary-section">
+                        <h4>Client Details <span class="step-status">In Progress</span></h4>
+                        <div id="client-summary" class="summary-content">
+                            <p class="empty-step">Client details will appear here</p>
+                        </div>
+                    </div>
+                    <div class="summary-section">
+                        <h4>Route Details <span class="step-status">Pending</span></h4>
+                        <div id="route-summary" class="summary-content">
+                            <p class="empty-step">Route details will appear here</p>
+                        </div>
+                    </div>
+                    <div class="summary-section">
+                        <h4>Truck Details <span class="step-status">Pending</span></h4>
+                        <div id="truck-summary" class="summary-content">
+                            <p class="empty-step">Truck details will appear here</p>
+                        </div>
+                    </div>
+                    <div class="summary-section">
+                        <h4>Driver Details <span class="step-status">Pending</span></h4>
+                        <div id="driver-summary" class="summary-content">
+                            <p class="empty-step">Driver details will appear here</p>
+                        </div>
+                    </div>
+                    <div class="summary-section">
+                        <h4>POD Details <span class="step-status">Pending</span></h4>
+                        <div id="pod-summary" class="summary-content">
+                            <p class="empty-step">POD details will appear here</p>
+                        </div>
+                    </div>
+                    <div class="summary-section">
+                        <h4>Cost Summary <span class="step-status">Pending</span></h4>
+                        <table class="summary-table">
+                            <tbody id="summary-items">
+                                <!-- Summary items will be dynamically loaded here -->
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <td>Subtotal</td>
+                                    <td id="subtotal">0.00 €</td>
+                                </tr>
+                                <tr>
+                                    <td>Shipping Cost</td>
+                                    <td id="shipping-cost">8.99 €</td>
+                                </tr>
+                                <tr class="summary-total">
+                                    <td>Total</td>
+                                    <td id="total">8.99 €</td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn-back" id="btn-back">← Back</button>
+                <div class="button-group">
+                    <button class="btn-save" id="btn-save" style="display: none;">Save and Exit</button>
+                    <button class="btn-next" id="btn-next">Next →</button>
+                </div>
+            </div>
+
+            <!-- Confirmation overlay that replaces browser alerts for step completion -->
+            <div id="stepper-confirmation-modal" style="position: absolute; inset: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 50;">
+                <div style="background:#fff; padding:24px; border-radius:8px; max-width:400px; width:90%; box-shadow:0 4px 8px rgba(0,0,0,0.15);">
+                    <h3 id="stepper-confirmation-text" style="margin-bottom:20px; color:#2d3748; font-size:20px;">Confirmation message</h3>
+                    <div style="display:flex; justify-content:flex-end; gap:12px;">
+                        <button onclick="handleStepperConfirmationNo()" class="btn-back" style="padding:8px 16px;">No</button>
+                        <button onclick="handleStepperConfirmationYes()" class="btn-next" style="padding:8px 16px;">Yes</button>
+                    </div>
+                </div>
+            </div>
+            
+        </div><!-- /.modal new-request-modal -->
+    </div><!-- /#new-request-modal overlay -->
+
+    <!-- Floating Action Button -->
+    <button class="floating-action-btn" onclick="openNewRequestModal()">
+        <i>+</i>
+        Add new request
+    </button>
+
+    
+
+    <!-- Demand Confirmation Modal -->
+    <div class="modal-overlay" id="demand-confirmation-modal">
+        <div class="modal" style="max-width: 500px; padding: 24px;">
+            <h3 style="margin-bottom: 20px; color: #2d3748; font-size: 20px;">choose request type</h3>
+            
+            <!-- Demand Selection Section (Initially Hidden) -->
+            <div id="demand-selection-section" style="display: none;">
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; margin-bottom: 10px; font-weight: 500; color: #4a5568;">
+                        Choose a project
+                    </label>
+                    <select id="project-selector" style="width: 100%; padding: 8px; border: 1px solid #e2e8f0; border-radius: 6px; margin-bottom: 15px;">
+                        <option value="">Select a project...</option>
+                        <option value="project1">Project #1 - Electricity project</option>
+                        <option value="project2">Project #2 - Kabsa project</option>
+                        <option value="project3">Project #3 - Jabal project</option>
+                    </select>
+                    <br>
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; margin-bottom: 10px; font-weight: 500; color: #4a5568;">
+                            Choose a demand
+                        </label>
+                        <select id="demand-selector" disabled style="width: 100%; padding: 8px; border: 1px solid #e2e8f0; border-radius: 6px; margin-bottom: 15px;">
+                            <option value="">Select a demand...</option>
+                            <option value="demand1">Demand #1 - Electronics Transport</option>
+                            <option value="demand2">Demand #2 - Food Products Delivery</option>
+                            <option value="demand3">Demand #3 - Construction Materials</option>
+                        </select>
+                    </div>
+                    <button onclick="showCreateDemandForm()" class="btn-next" style="width: 100%; margin-top: 10px;">
+                        Create New Demand
+                    </button>
+                </div>
+            </div>
+
+            <!-- Create New Demand Form (Initially Hidden) -->
+            <div id="create-demand-form" style="display: none;">
+                <div style="margin-bottom: 20px;">
+                    <div class="form-field" style="margin-bottom: 15px;">
+                        <label style="display: block; margin-bottom: 8px; font-weight: 500; color: #4a5568;">
+                            Select Client:
+                        </label>
+                        <div style="position: relative;">
+                            <input type="text" id="new-demand-client" 
+                                   style="width: 100%; padding: 8px 30px 8px 12px; border: 1px solid #e2e8f0; border-radius: 6px;"
+                                   placeholder="Search client...">
+                            <button onclick="clearClientSelection()" 
+                                    style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); border: none; background: none; cursor: pointer; padding: 0;">
+                                ×
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="form-field" style="margin-bottom: 15px;">
+                        <label style="display: block; margin-bottom: 8px; font-weight: 500; color: #4a5568;">
+                            Select Project:
+                        </label>
+                        <select id="new-demand-project" 
+                                style="width: 100%; padding: 8px; border: 1px solid #e2e8f0; border-radius: 6px;">
+                            <option value="">Select project...</option>
+                            <option value="project1">Project 1</option>
+                            <option value="project2">Project 2</option>
+                            <option value="project3">Project 3</option>
+                        </select>
+                    </div>
+
+                    <div style="display: flex; gap: 15px;">
+                        <div class="form-field" style="flex: 1;">
+                            <label style="display: block; margin-bottom: 8px; font-weight: 500; color: #4a5568;">
+                                Start Date:
+                            </label>
+                            <input type="date" id="new-demand-start-date"
+                                   style="width: 100%; padding: 8px; border: 1px solid #e2e8f0; border-radius: 6px;">
+                        </div>
+                        <div class="form-field" style="flex: 1;">
+                            <label style="display: block; margin-bottom: 8px; font-weight: 500; color: #4a5568;">
+                                End Date:
+                            </label>
+                            <input type="date" id="new-demand-end-date"
+                                   style="width: 100%; padding: 8px; border: 1px solid #e2e8f0; border-radius: 6px;">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="button-group request-type-buttons">
+                <button onclick="handleDemandNo()" class="request-type-btn standalone-btn">
+                    Standalone request
+                </button>
+                <button onclick="handleDemandYes()" class="request-type-btn project-btn">
+                    Request To project
+                </button>
+            </div>
+        </div>
+    </div>
+
+   
+</body>
+</html>
